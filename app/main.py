@@ -1,6 +1,6 @@
 
 from fastapi import FastAPI
-from database import local_session
-from sqlalchemy import Session
+from router import router
 
 app = FastAPI()
+app.include_router(router=router)

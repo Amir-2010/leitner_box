@@ -9,6 +9,7 @@ class users(Base):
     id = Column(Integer,primary_key=True,autoincrement=True)
     user_name = Column(String)
     password = Column(String)
+    token = Column(String)
     token_time = Column(Integer)
 
 class cards(Base):
