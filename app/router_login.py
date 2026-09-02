@@ -21,10 +21,6 @@ auth2_bearer = HTTPBearer()
 token_key = "the secret key:)"
 
 class decode_token:
-    def user_id(token=Depends(auth2_bearer)):
-        decode = jwt.decode(token.credentials,token_key,algorithms=["HS256"])
-        return decode.get("id")
-
     def name(token=Depends(auth2_bearer)):
         decode = jwt.decode(token.credentials,token_key,algorithms=["HS256"])
         return decode.get("name")
@@ -39,7 +35,7 @@ def create_token(user_name,password):
     encode.update({"exp":expire})
     return jwt.encode(encode,token_key,algorithm="HS256")
 
-@router.post("/signup",tags=["login"])
+@router.post("/signup",tags=["login methods"])
 def signup(data:signup_schemas,db:Session=Depends(get_db)):
     global token_key
     query = db.query(users)
@@ -54,7 +50,7 @@ def signup(data:signup_schemas,db:Session=Depends(get_db)):
     else:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="duplicate name")
 
-@router.post("/login",tags=["login"])
+@router.post("/login",tags=["login methods"])
 def login(data:login_schemas,db:Session=Depends(get_db)):
     global token_key
     query = db.query(users)
@@ -84,7 +80,7 @@ def login(data:login_schemas,db:Session=Depends(get_db)):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
-@router.put("/rename",tags=["update"])
+@router.put("/rename",tags=["login methods"])
 def rename(data:rename_schemas,db:Session=Depends(get_db)):
     query = db.query(users)
     result = query.where(users.user_name==data.name).one_or_none()
@@ -104,7 +100,7 @@ def rename(data:rename_schemas,db:Session=Depends(get_db)):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
-@router.put("/change_password",tags=["update"])
+@router.put("/change_password",tags=["login methods"])
 def change_password(data:change_password_schemas,db:Session=Depends(get_db)):
     query = db.query(users)
     result = query.where(users.user_name==data.name).one_or_none()
@@ -124,7 +120,7 @@ def change_password(data:change_password_schemas,db:Session=Depends(get_db)):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
-@router.delete("/delete_user",tags=["delete user"])
+@router.delete("/delete_user",tags=["login methods"])
 def delete_user(data:login_schemas,db:Session=Depends(get_db)):
     query = db.query(users)
     check_name = query.where(users.user_name==data.name).one_or_none()

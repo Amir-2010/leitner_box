@@ -12,13 +12,6 @@ class users(Base):
     token = Column(String)
     token_time = Column(Integer)
 
-class cards(Base):
-    __tablename__ = "cards"
-    id = Column(Integer,primary_key=True,autoincrement=True)
-    user = Column(String)
-    card_name = Column(String)
-    description = Column(String)
-
 class boxes(Base):
     __tablename__ = "boxes"
     id = Column(Integer,primary_key=True,autoincrement=True)

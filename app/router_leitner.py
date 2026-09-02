@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from models import boxes,users
 from router_login import decode_token
 from router_login import auth2_bearer
-from datetime import date
 
 router = APIRouter()
 
@@ -23,7 +22,7 @@ def get_db():
 # box 4 ==> rule: every week
 # box 5 ==> rule: every 2 week
 
-@router.post("/create cards",tags=["box methods"])
+@router.post("/create_cards",tags=["box methods"])
 def create_cart(word:str,description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
     query = db.query(users)
     user_name = decode_token.name(token)
@@ -42,24 +41,60 @@ def create_cart(word:str,description:str,db:Session=Depends(get_db),token=Depend
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
-def get_card(user_id:str,name:str,db:Session=Depends(get_db)):
-    query = db.query(users)
-    result = query.where(users.id==user_id).one_or_none()
+@router.get("/get_cards",tags=["box methods"])
+def get_card(db:Session=Depends(get_db),token=Depends(auth2_bearer)):
+    query = db.query(boxes)
+    user_name = decode_token.name(token)
+    result = query.where(boxes.user==user_name).all()
     if result:
-        query = db.query(boxes)
-        result = query.where(boxes.card_name==name).one_or_none()
-        if result:
-            return result
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="card not found")
+        return result
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
 
-def change_word(user_id:str,name:str,db:Session=Depends(get_db)):
-    pass
+@router.put("/change_word",tags=["box methods"])
+def change_word(word:str,new_word:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
+    query = db.query(boxes)
+    user_name = decode_token.name(token)
+    result = query.where(boxes.user==user_name).all()
+    if result:
+        result = query.where(boxes.user==user_name,boxes.card_name==word).first()
+        if result:
+            result.card_name = new_word
+            db.commit()
+            return {"status code":status.HTTP_202_ACCEPTED,"detail":"word changed"}
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
-def change_description():
-    pass
+@router.put("/change_description",tags=["box methods"])
+def change_description(word:str,new_description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
+    query = db.query(boxes)
+    user_name = decode_token.name(token)
+    result = query.where(boxes.user==user_name).all()
+    if result:
+        result = query.where(boxes.user==user_name,boxes.card_name==word).first()
+        if result:
+            result.description = new_description
+            db.commit()
+            return {"status code":status.HTTP_202_ACCEPTED,"detail":"description changed"}
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
-def delete_card():
-    pass
+@router.delete("/delete_cards",tags=["box methods"])
+def delete_card(word:str,new_description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
+    query = db.query(boxes)
+    user_name = decode_token.name(token)
+    result = query.where(boxes.user==user_name).all()
+    if result:
+        result = query.where(boxes.user==user_name,boxes.card_name==word).first()
+        if result:
+            query.where(boxes.user==user_name,boxes.card_name==word).delete()
+            db.commit()
+            return {"status code":status.HTTP_204_NO_CONTENT,"detail":"word deleted"}
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
