@@ -16,12 +16,6 @@ def get_db():
     finally:
         db.close()
 
-# box 1 ==> rule: add in this box first - every day
-# box 2 ==> rule: every 2 days
-# box 3 ==> rule: every 4 days
-# box 4 ==> rule: every week
-# box 5 ==> rule: every 2 week
-
 @router.post("/create_cards",tags=["box methods"])
 def create_cart(word:str,description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
     query = db.query(users)
