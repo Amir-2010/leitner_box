@@ -14,36 +14,15 @@ class users(Base):
 
 class cards(Base):
     __tablename__ = "cards"
-    user_id = Column(Integer,ForeignKey("users.id"),primary_key=True)
+    id = Column(Integer,primary_key=True,autoincrement=True)
+    user = Column(String)
     card_name = Column(String)
     description = Column(String)
 
-class box1(Base):
-    __tablename__ = "box1"
-    user_id = Column(Integer,ForeignKey("users.id"),primary_key=True)
-    card_name = Column(String)
-    description = Column(String)
-
-class box2(Base):
-    __tablename__ = "box2"
-    user_id = Column(Integer,ForeignKey("users.id"),primary_key=True)
-    card_name = Column(String)
-    description = Column(String)
-
-class box3(Base):
-    __tablename__ = "box3"
-    user_id = Column(Integer,ForeignKey("users.id"),primary_key=True)
-    card_name = Column(String)
-    description = Column(String)
-
-class box4(Base):
-    __tablename__ = "box4"
-    user_id = Column(Integer,ForeignKey("users.id"),primary_key=True)
-    card_name = Column(String)
-    description = Column(String)
-
-class box5(Base):
-    __tablename__ = "box5"
-    user_id = Column(Integer,ForeignKey("users.id"),primary_key=True)
+class boxes(Base):
+    __tablename__ = "boxes"
+    id = Column(Integer,primary_key=True,autoincrement=True)
+    user = Column(String)
+    box_number = Column(Integer)
     card_name = Column(String)
     description = Column(String)

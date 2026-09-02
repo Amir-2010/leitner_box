@@ -1,13 +1,13 @@
 
 from fastapi import APIRouter,Depends,status,HTTPException
+from fastapi.security import HTTPBearer
 from database import local_session
 from schemas import *
 from datetime import datetime
 from datetime import timedelta,timezone
-import secrets
 from jose import jwt
 from sqlalchemy.orm import Session
-from models import users
+from models import users,boxes
 
 def get_db():
     db = local_session()
@@ -17,13 +17,27 @@ def get_db():
         db.close()
 
 router = APIRouter()
-token_key = secrets.token_bytes(32)
+auth2_bearer = HTTPBearer()
+token_key = "the secret key:)"
 
-def create_token(user_name,password,secret_key):
+class decode_token:
+    def user_id(token=Depends(auth2_bearer)):
+        decode = jwt.decode(token.credentials,token_key,algorithms=["HS256"])
+        return decode.get("id")
+
+    def name(token=Depends(auth2_bearer)):
+        decode = jwt.decode(token.credentials,token_key,algorithms=["HS256"])
+        return decode.get("name")
+
+    def password(token=Depends(auth2_bearer)):
+        decode = jwt.decode(token.credentials,token_key,algorithms=["HS256"])
+        return decode.get("password")
+
+def create_token(user_name,password):
     encode = {"name":user_name,"password":password}
     expire = datetime.now(timezone.utc) + timedelta(weeks=4)
     encode.update({"exp":expire})
-    return jwt.encode(encode,secret_key,algorithm="HS256")
+    return jwt.encode(encode,token_key,algorithm="HS256")
 
 @router.post("/signup",tags=["login"])
 def signup(data:signup_schemas,db:Session=Depends(get_db)):
@@ -31,8 +45,8 @@ def signup(data:signup_schemas,db:Session=Depends(get_db)):
     query = db.query(users)
     result = query.where(data.name==users.user_name).one_or_none()
     if result == None:
-        token = create_token(data.name,data.password,token_key)
         expired_token = datetime.now(timezone.utc) + timedelta(weeks=4)
+        token = create_token(data.name,data.password)
         user_obj = users(user_name=data.name,password=data.password,token=token,token_time=expired_token)
         db.add(user_obj)
         db.commit()
@@ -115,10 +129,11 @@ def delete_user(data:login_schemas,db:Session=Depends(get_db)):
     query = db.query(users)
     check_name = query.where(users.user_name==data.name).one_or_none()
     if check_name:
-        check_password = query.where(users.user_name==data.name,
-                                     users.password==data.password).one_or_none()
+        check_password = query.where(users.user_name==data.name,users.password==data.password).one_or_none()
         if check_password:
             db.delete(check_password)
+            db.commit()
+            db.query(boxes).where(boxes.user==data.name).delete()
             db.commit()
             return {"status code":status.HTTP_204_NO_CONTENT,"detail":"user deleted"}
         else:
