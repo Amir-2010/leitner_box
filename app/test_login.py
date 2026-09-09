@@ -111,4 +111,4 @@ def test_delete(name,password):
                                   json={"name":name,"password":password})
     result = client.request("delete","/delete_user",
                             headers={"Authorization":f"Bearer {login_result.json()["token"]}"})
-    assert result == "user deleted"
+    assert result.json()["detail"] == "user deleted"
