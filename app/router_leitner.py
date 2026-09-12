@@ -16,8 +16,8 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/create_cards",tags=["box methods"])
-def create_cart(word:str,description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
+@router.post("/create_card",tags=["box methods"])
+def create_card(word:str,description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
     query = db.query(users)
     user_name = decode_token.name(token)
     result = query.where(users.user_name==user_name).one_or_none()
@@ -29,11 +29,11 @@ def create_cart(word:str,description:str,db:Session=Depends(get_db),token=Depend
             db.add(box_obj)
             db.commit()
             db.refresh(box_obj)
-            return box_obj
+            return "card created"
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="duplicate card name")
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
 
 @router.get("/get_cards",tags=["box methods"])
 def get_card(db:Session=Depends(get_db),token=Depends(auth2_bearer)):
@@ -78,7 +78,7 @@ def change_description(word:str,new_description:str,db:Session=Depends(get_db),t
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
 @router.delete("/delete_cards",tags=["box methods"])
-def delete_card(word:str,new_description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
+def delete_card(word:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
     query = db.query(boxes)
     user_name = decode_token.name(token)
     result = query.where(boxes.user==user_name).all()
@@ -91,4 +91,4 @@ def delete_card(word:str,new_description:str,db:Session=Depends(get_db),token=De
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="card not found")

@@ -19,6 +19,3 @@ class boxes(Base):
     box_number = Column(Integer)
     card_name = Column(String)
     description = Column(String)
-
-session.query(users).delete()
-session.commit()
