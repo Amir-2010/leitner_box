@@ -30,20 +30,17 @@ def create_card(word:str,description:str,db:Session=Depends(get_db),token=Depend
             db.commit()
             db.refresh(box_obj)
             return "card created"
-        else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="duplicate card name")
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="duplicate card name")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
 
 @router.get("/get_cards",tags=["box methods"])
-def get_card(db:Session=Depends(get_db),token=Depends(auth2_bearer)):
+def get_cards(db:Session=Depends(get_db),token=Depends(auth2_bearer)):
     query = db.query(boxes)
     user_name = decode_token.name(token)
     result = query.where(boxes.user==user_name).all()
     if result:
-        return result
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
+        return HTTPException(status_code=status.HTTP_200_OK,detail=result)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
 
 @router.put("/change_word",tags=["box methods"])
 def change_word(word:str,new_word:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
@@ -55,11 +52,9 @@ def change_word(word:str,new_word:str,db:Session=Depends(get_db),token=Depends(a
         if result:
             result.card_name = new_word
             db.commit()
-            return {"status code":status.HTTP_202_ACCEPTED,"detail":"word changed"}
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
+            return {"detail":"word changed"}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
 @router.put("/change_description",tags=["box methods"])
 def change_description(word:str,new_description:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
@@ -71,24 +66,17 @@ def change_description(word:str,new_description:str,db:Session=Depends(get_db),t
         if result:
             result.description = new_description
             db.commit()
-            return {"status code":status.HTTP_202_ACCEPTED,"detail":"description changed"}
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
+            return {"detail":"description changed"}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
-@router.delete("/delete_cards",tags=["box methods"])
+@router.delete("/delete_card",tags=["box methods"])
 def delete_card(word:str,db:Session=Depends(get_db),token=Depends(auth2_bearer)):
     query = db.query(boxes)
     user_name = decode_token.name(token)
-    result = query.where(boxes.user==user_name).all()
+    result = query.where(boxes.user==user_name,boxes.card_name==word).first()
     if result:
-        result = query.where(boxes.user==user_name,boxes.card_name==word).first()
-        if result:
-            query.where(boxes.user==user_name,boxes.card_name==word).delete()
-            db.commit()
-            return {"status code":status.HTTP_204_NO_CONTENT,"detail":"word deleted"}
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="card not found")
+        query.where(boxes.user==user_name,boxes.card_name==word).delete()
+        db.commit()
+        return {"detail":"word deleted"}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
