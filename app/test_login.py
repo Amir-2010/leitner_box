@@ -42,7 +42,6 @@ def test_login(name,password):
                           ("Reza","Reza1234","Reza1234"),
                           ("Mary","Mary1234","Mary1234"),
                           ("Billy","Billy1234","Billy1234")])
-
 def test_rename(name,password,new_name):
     # name changed
     result = client.request("post","/login",json={"name":name,"password":password})

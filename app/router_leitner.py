@@ -50,9 +50,13 @@ def change_word(word:str,new_word:str,db:Session=Depends(get_db),token=Depends(a
     if result:
         result = query.where(boxes.user==user_name,boxes.card_name==word).first()
         if result:
-            result.card_name = new_word
-            db.commit()
-            return {"detail":"word changed"}
+            result = query.where(boxes.user==user_name,boxes.card_name==new_word).one_or_none()
+            if result == None:
+                result = query.where(boxes.user==user_name,boxes.card_name==word).first()
+                result.card_name = new_word
+                db.commit()
+                return {"detail":"word changed"}
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="duplicate name")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="word not found")
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="name not found")
 
