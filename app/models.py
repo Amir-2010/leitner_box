@@ -1,6 +1,6 @@
 
 from database import local_session,Base
-from sqlalchemy import Column,String,Integer,ForeignKey
+from sqlalchemy import Column,String,Integer,DateTime,ForeignKey
 
 session = local_session()
 
@@ -19,3 +19,4 @@ class boxes(Base):
     box_number = Column(Integer)
     card_name = Column(String)
     description = Column(String)
+    review_time = Column(DateTime)

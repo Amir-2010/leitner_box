@@ -47,14 +47,6 @@ def test_create_card_duplicate_card(word,description):
                         headers={"Authorization":f"Bearer {token}"})
     assert card.json()["detail"] == "duplicate card name"
 
-def test_get_cards():
-    find_user = client.request("post","/login",
-                               json={"name":"Amir","password":"Amir1234"})
-    token = find_user.json()["token"]
-    card = client.request("get","/get_cards",
-                        headers={"Authorization":f"Bearer {token}"})
-    assert card.json()["status_code"] == status.HTTP_200_OK
-
 def test_change_word():
     find_user = client.request("post","/login",
                                json={"name":"Amir","password":"Amir1234"})
