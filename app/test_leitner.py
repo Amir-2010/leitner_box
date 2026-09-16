@@ -102,7 +102,7 @@ def test_delete_word_not_found():
     assert delete_words.json()["detail"]=="word not found"
 
 @pytest.mark.parametrize("word,description",
-                         [("Egg", "A round fruit that can be red, green, or yellow."),
+                         [("Egg", "An oval object laid by a bird, often eaten"),
                           ("Book", "Something you read."),
                           ("Cat", "A small animal that people often keep at home."),
                           ("Dog", "A common animal that people keep as a pet."),
@@ -120,3 +120,6 @@ def test_delete_cards(word,description):
                                   params={"word":word,"description":description},
                                   headers={"Authorization":f"Bearer {token}"})
     assert delete_words.json()["detail"]=="word deleted"
+
+def test_answer_card_card_not_found():
+    pass

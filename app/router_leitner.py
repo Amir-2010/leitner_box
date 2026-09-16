@@ -131,9 +131,9 @@ def answer_card(card_id: int, correct: bool, db: Session = Depends(get_db), toke
     user_name = decode_token.name(token)
     card = db.query(boxes).where(boxes.id == card_id, boxes.user == user_name).first()
     if not card:
-        raise HTTPException(status_code=404, detail="Card not found")
+        raise HTTPException(status_code=404, detail="card not found")
     if not card:
-        raise HTTPException(status_code=404, detail="Card not found")
+        raise HTTPException(status_code=404, detail="card not found")
     if correct:
         if card.box_number == 5:
             result = card.card_name
